@@ -64,10 +64,10 @@ export default function Navigation() {
               {t("nav.campus")}
             </a>
             <a href="#programs" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
-              {t("nav.programs")}
+              {t("nav.diplomes")}
             </a>
-            <a href="#certifications" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
-              {t("nav.certifications")}
+            <a href="#formations" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
+              {t("nav.formations")}
             </a>
             <a href="#registration" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
               {t("nav.registration")}
@@ -160,10 +160,10 @@ export default function Navigation() {
               {t("nav.campus")}
             </a>
             <a href="#programs" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-              {t("nav.programs")}
+              {t("nav.diplomes")}
             </a>
-            <a href="#certifications" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-              {t("nav.certifications")}
+            <a href="#formations" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
+              {t("nav.formations")}
             </a>
             <a href="#registration" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
               {t("nav.registration")}

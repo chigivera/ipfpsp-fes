@@ -14,6 +14,8 @@ interface LanguageContextType {
 const translations = {
   ar: {
     "nav.home": "الرئيسية",
+    "nav.diplomes": "الدبلومات",
+    "nav.formations": "التكوينات",
     "nav.programs": "البرامج",
     "nav.certifications": "الشهادات",
     "nav.about": "عنا",
@@ -273,6 +275,8 @@ const translations = {
   },
   fr: {
     "nav.home": "Accueil",
+    "nav.diplomes": "Diplômes",
+    "nav.formations": "Formations",
     "nav.programs": "Programmes",
     "nav.certifications": "Certifications",
     "nav.about": "À propos",
@@ -535,6 +539,8 @@ const translations = {
   },
   de: {
     "nav.home": "Startseite",
+    "nav.diplomes": "Diplome",
+    "nav.formations": "Ausbildungen",
     "nav.programs": "Programme",
     "nav.certifications": "Zertifizierungen",
     "nav.about": "Über Uns",

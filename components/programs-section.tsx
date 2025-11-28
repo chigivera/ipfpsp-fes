@@ -191,7 +191,7 @@ export default function ProgramsSection() {
         </div>
 
         {/* Formations Section */}
-        <div className="mb-16">
+        <div id="formations" className="mb-16 scroll-mt-20">
           <div className="text-center mb-8">
             <h3 className="text-3xl font-bold mb-4">Formations / Ausbildungsprogramme / برامج التكوين</h3>
             <p className="text-muted-foreground">برامج متنوعة لتلبية احتياجاتك / Programmes variés pour répondre à vos besoins / Vielfältige Programme für Ihre Bedürfnisse</p>
