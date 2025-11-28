@@ -230,7 +230,7 @@ export default function ProgramsSection() {
             </div>
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
               <Image
-                src="https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop"
+                src="https://images.pexels.com/photos/301926/pexels-photo-301926.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop"
                 alt="Language Learning - Students Studying Languages"
                 fill
                 className="object-cover"
@@ -375,7 +375,7 @@ export default function ProgramsSection() {
                 <div className="p-6 overflow-y-auto max-h-[70vh]">
                   <div className="relative w-full h-96 mb-6 rounded-lg overflow-hidden shadow-lg">
                     <Image
-                      src={imagePath || "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=1200&h=600&fit=crop"}
+                      src={imagePath || "https://images.pexels.com/photos/28271058/pexels-photo-28271058.jpeg?w=1200&h=600&fit=crop"}
                       alt={t(item.titleKey)}
                       fill
                       className="object-cover"

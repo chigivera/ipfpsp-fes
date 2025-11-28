@@ -77,7 +77,7 @@ export default function HeroSection() {
           <div className="relative hidden lg:block">
             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl">
               <Image
-                src="https://images.pexels.com/photos/5212317/pexels-photo-5212317.jpeg?auto=compress&cs=tinysrgb&w=1200&h=1200&fit=crop"
+                src="https://images.pexels.com/photos/4586993/pexels-photo-4586993.jpeg?auto=compress&cs=tinysrgb&w=1200&h=1200&fit=crop"
                 alt="IPFPSP Students in Classroom"
                 fill
                 className="object-cover"

@@ -50,7 +50,7 @@ export default function CampusSection() {
           </div>
           <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
             <Image
-              src="https://images.pexels.com/photos/159775/library-la-trobe-study-students-159775.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop"
+              src="https://images.pexels.com/photos/2675061/pexels-photo-2675061.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop"
               alt="IPFPSP Campus - Modern Library and Facilities"
               fill
               className="object-cover"
