@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useLanguage } from "@/context/language-context"
-import { Menu, X, ChevronDown } from "lucide-react"
+import { Menu, X, ChevronDown, MoreVertical } from "lucide-react"
 import Image from "next/image"
 
 type Language = "ar" | "fr" | "de"
@@ -11,7 +11,9 @@ export default function Navigation() {
   const { language, setLanguage, dir, t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
+  const [isMoreOpen, setIsMoreOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const moreDropdownRef = useRef<HTMLDivElement>(null)
 
   const languages: { code: Language; flag: string; name: string }[] = [
     { code: "ar", flag: "🇲🇦", name: "العربية" },
@@ -21,26 +23,53 @@ export default function Navigation() {
 
   const currentLang = languages.find((l) => l.code === language) || languages[0]
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    if (!isLanguageOpen) return
+  // Primary navigation items (always visible on large screens)
+  const primaryNavItems = [
+    { href: "#about", key: "nav.about" },
+    { href: "#programs", key: "nav.programs" },
+    { href: "#registration", key: "nav.registration" },
+    { href: "#contact", key: "nav.contact" },
+  ]
 
+  // Secondary navigation items (in dropdown on medium screens)
+  const secondaryNavItems = [
+    { href: "#vision", key: "nav.vision" },
+    { href: "#values", key: "nav.values" },
+    { href: "#campus", key: "nav.campus" },
+    { href: "#diplomas", key: "nav.diplomas" },
+    { href: "#languages", key: "nav.languages" },
+    { href: "#online", key: "nav.online" },
+    { href: "#companies", key: "nav.companies" },
+    { href: "#faq", key: "nav.faq" },
+  ]
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsLanguageOpen(false)
       }
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
+        setIsMoreOpen(false)
+      }
     }
 
-    // Add a small delay to avoid immediate closure when opening
-    const timeoutId = setTimeout(() => {
-      document.addEventListener("mousedown", handleClickOutside)
-    }, 10)
-    
-    return () => {
-      clearTimeout(timeoutId)
-      document.removeEventListener("mousedown", handleClickOutside)
+    if (isLanguageOpen || isMoreOpen) {
+      const timeoutId = setTimeout(() => {
+        document.addEventListener("mousedown", handleClickOutside)
+      }, 10)
+      
+      return () => {
+        clearTimeout(timeoutId)
+        document.removeEventListener("mousedown", handleClickOutside)
+      }
     }
-  }, [isLanguageOpen])
+  }, [isLanguageOpen, isMoreOpen])
+
+  // Close mobile menu when clicking a link
+  const handleNavClick = () => {
+    setIsOpen(false)
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-card/95 backdrop-blur border-b border-border overflow-visible">
@@ -55,37 +84,132 @@ export default function Navigation() {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            <a href="#about" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
-              {t("nav.about")}
-            </a>
-            <a href="#campus" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
-              {t("nav.campus")}
-            </a>
-            <a href="#programs" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
-              {t("nav.diplomes")}
-            </a>
-            <a href="#formations" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
-              {t("nav.formations")}
-            </a>
-            <a href="#registration" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
-              {t("nav.registration")}
-            </a>
-            <a href="#faq" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
-              {t("nav.faq")}
-            </a>
-            <a href="#contact" className="px-3 py-2 text-sm font-medium hover:text-primary transition">
-              {t("nav.contact")}
-            </a>
-            <a 
-              href="https://german-assist.com/login/index.php" 
-              target="_blank" 
+          {/* Desktop Navigation - Large screens (lg and above) */}
+          <div className="hidden lg:flex items-center gap-0.5 flex-wrap max-w-4xl">
+            {primaryNavItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="px-2.5 py-2 text-xs xl:text-sm font-medium hover:text-primary hover:bg-muted/50 rounded-md transition-colors whitespace-nowrap"
+              >
+                {t(item.key)}
+              </a>
+            ))}
+            <div className="relative" ref={moreDropdownRef}>
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setIsMoreOpen(!isMoreOpen)
+                }}
+                className="px-2.5 py-2 text-xs xl:text-sm font-medium hover:text-primary hover:bg-muted/50 rounded-md transition-colors flex items-center gap-1 whitespace-nowrap"
+                type="button"
+              >
+                <span>{t("nav.more")}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isMoreOpen && (
+                <div
+                  className={`absolute top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-xl py-2 z-[9999] ${
+                    dir === "rtl" ? "left-0" : "right-0"
+                  }`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {secondaryNavItems.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsMoreOpen(false)}
+                      className={`block px-4 py-2 text-xs xl:text-sm hover:bg-muted transition ${
+                        dir === "rtl" ? "text-right" : "text-left"
+                      }`}
+                    >
+                      {t(item.key)}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+            <a
+              href="https://german-assist.com/login/index.php"
+              target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              className="px-3 py-2 text-xs xl:text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors whitespace-nowrap ml-1"
             >
               {t("nav.elearning")}
             </a>
+          </div>
+
+          {/* Tablet Navigation - Medium screens (md to lg) */}
+          <div className="hidden md:flex lg:hidden items-center gap-1">
+            {primaryNavItems.slice(0, 3).map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="px-2 py-1.5 text-xs font-medium hover:text-primary hover:bg-muted/50 rounded-md transition-colors"
+              >
+                {t(item.key)}
+              </a>
+            ))}
+            <div className="relative" ref={moreDropdownRef}>
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setIsMoreOpen(!isMoreOpen)
+                }}
+                className="px-2 py-1.5 text-xs font-medium hover:text-primary hover:bg-muted/50 rounded-md transition-colors flex items-center gap-1"
+                type="button"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+              {isMoreOpen && (
+                <div
+                  className={`absolute top-full mt-1 w-56 bg-card border border-border rounded-lg shadow-xl py-2 z-[9999] max-h-[80vh] overflow-y-auto ${
+                    dir === "rtl" ? "left-0" : "right-0"
+                  }`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {primaryNavItems.slice(3).map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsMoreOpen(false)}
+                      className={`block px-4 py-2 text-xs hover:bg-muted transition ${
+                        dir === "rtl" ? "text-right" : "text-left"
+                      }`}
+                    >
+                      {t(item.key)}
+                    </a>
+                  ))}
+                  <div className="border-t border-border my-1" />
+                  {secondaryNavItems.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsMoreOpen(false)}
+                      className={`block px-4 py-2 text-xs hover:bg-muted transition ${
+                        dir === "rtl" ? "text-right" : "text-left"
+                      }`}
+                    >
+                      {t(item.key)}
+                    </a>
+                  ))}
+                  <div className="border-t border-border my-1" />
+                  <a
+                    href="https://german-assist.com/login/index.php"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsMoreOpen(false)}
+                    className={`block px-4 py-2 text-xs bg-primary/10 text-primary font-medium hover:bg-primary/20 transition ${
+                      dir === "rtl" ? "text-right" : "text-left"
+                    }`}
+                  >
+                    {t("nav.elearning")}
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Section */}
@@ -152,36 +276,48 @@ export default function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden pb-4 space-y-2">
-            <a href="#about" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-              {t("nav.about")}
-            </a>
-            <a href="#campus" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-              {t("nav.campus")}
-            </a>
-            <a href="#programs" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-              {t("nav.diplomes")}
-            </a>
-            <a href="#formations" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-              {t("nav.formations")}
-            </a>
-            <a href="#registration" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-              {t("nav.registration")}
-            </a>
-            <a href="#faq" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-              {t("nav.faq")}
-            </a>
-            <a href="#contact" className="block px-3 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-              {t("nav.contact")}
-            </a>
-            <a 
-              href="https://german-assist.com/login/index.php" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block px-3 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              {t("nav.elearning")}
-            </a>
+          <div className="md:hidden pb-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
+            <div className="space-y-1">
+              <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {t("nav.home")}
+              </div>
+              {primaryNavItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={handleNavClick}
+                  className="block px-3 py-2.5 text-sm font-medium hover:bg-muted rounded-lg transition-colors"
+                >
+                  {t(item.key)}
+                </a>
+              ))}
+            </div>
+            <div className="space-y-1 mt-4">
+              <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {t("nav.more")}
+              </div>
+              {secondaryNavItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={handleNavClick}
+                  className="block px-3 py-2.5 text-sm font-medium hover:bg-muted rounded-lg transition-colors"
+                >
+                  {t(item.key)}
+                </a>
+              ))}
+            </div>
+            <div className="mt-4 pt-4 border-t border-border">
+              <a
+                href="https://german-assist.com/login/index.php"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleNavClick}
+                className="block px-3 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-center"
+              >
+                {t("nav.elearning")}
+              </a>
+            </div>
           </div>
         )}
       </div>

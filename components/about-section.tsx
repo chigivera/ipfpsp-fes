@@ -68,7 +68,7 @@ export default function AboutSection() {
         </div>
 
         {/* Vision */}
-        <div className="mb-20">
+        <div id="vision" className="mb-20 scroll-mt-20">
           <div className="text-center mb-12">
             <h2 className="text-4xl sm:text-5xl font-bold mb-4">{t("vision.title")}</h2>
           </div>
@@ -80,7 +80,7 @@ export default function AboutSection() {
         </div>
 
         {/* Values */}
-        <div>
+        <div id="values" className="scroll-mt-20">
           <div className="text-center mb-12">
             <h2 className="text-4xl sm:text-5xl font-bold mb-4">{t("values.title")}</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
