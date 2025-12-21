@@ -48,24 +48,39 @@ export default function Navigation() {
     const handleHashScroll = () => {
       const hash = window.location.hash
       if (hash) {
-        setTimeout(() => {
+        // Wait for page to be fully rendered
+        const scrollToHash = () => {
           const targetId = hash.replace('#', '')
-          const element = document.getElementById(targetId)
+          let element = document.getElementById(targetId)
+          
+          // Try querySelector as fallback
+          if (!element) {
+            element = document.querySelector(`[id="${targetId}"]`) as HTMLElement
+          }
+          
           if (element) {
             const headerOffset = 100
             const elementPosition = element.getBoundingClientRect().top
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+            
             window.scrollTo({
-              top: offsetPosition,
+              top: Math.max(0, offsetPosition),
               behavior: 'smooth'
             })
           }
-        }, 100)
+        }
+        
+        // Try immediately
+        scrollToHash()
+        
+        // Also try after a short delay in case DOM isn't ready
+        setTimeout(scrollToHash, 100)
+        setTimeout(scrollToHash, 500)
       }
     }
 
-    // Handle initial hash
-    handleHashScroll()
+    // Handle initial hash after component mounts
+    setTimeout(handleHashScroll, 0)
 
     // Handle hash changes (e.g., browser back/forward)
     window.addEventListener('hashchange', handleHashScroll)
@@ -78,18 +93,26 @@ export default function Navigation() {
   // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsLanguageOpen(false)
       }
-      if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
-        setIsMoreOpen(false)
+      
+      // Only close more dropdown if clicking outside AND not on a button inside it
+      if (moreDropdownRef.current) {
+        const clickedButton = (target as HTMLElement).closest('button')
+        if (!moreDropdownRef.current.contains(target) && !clickedButton) {
+          setIsMoreOpen(false)
+        }
       }
     }
 
     if (isLanguageOpen || isMoreOpen) {
+      // Use a longer delay to allow button clicks to register first
       const timeoutId = setTimeout(() => {
         document.addEventListener("mousedown", handleClickOutside)
-      }, 10)
+      }, 100)
       
       return () => {
         clearTimeout(timeoutId)
@@ -106,23 +129,71 @@ export default function Navigation() {
   // Smooth scroll to section with offset for sticky navbar
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault()
+    e.stopPropagation()
+    
     const targetId = href.replace('#', '')
-    const element = document.getElementById(targetId)
     
-    if (element) {
-      const headerOffset = 100 // Account for sticky navbar + some padding
-      const elementPosition = element.getBoundingClientRect().top
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      })
-    }
-    
-    // Close menus
+    // Close menus first
     setIsOpen(false)
     setIsMoreOpen(false)
+    
+    // Function to perform the scroll
+    const performScroll = () => {
+      let element = document.getElementById(targetId)
+      
+      // Try querySelector as fallback
+      if (!element) {
+        element = document.querySelector(`[id="${targetId}"]`) as HTMLElement
+      }
+      
+      // Try finding by data attribute or any element with the ID
+      if (!element) {
+        const allElements = document.querySelectorAll(`[id]`)
+        for (let i = 0; i < allElements.length; i++) {
+          if (allElements[i].id === targetId) {
+            element = allElements[i] as HTMLElement
+            break
+          }
+        }
+      }
+      
+      if (element) {
+        // Calculate the exact position with offset for sticky navbar
+        const headerOffset = 100
+        const rect = element.getBoundingClientRect()
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+        const elementTop = rect.top + scrollTop
+        const offsetPosition = elementTop - headerOffset
+
+        // Scroll to the calculated position
+        window.scrollTo({
+          top: Math.max(0, offsetPosition),
+          behavior: 'smooth'
+        })
+        
+        // Update URL hash
+        if (window.history && window.history.pushState) {
+          window.history.pushState(null, '', href)
+        }
+        return true
+      }
+      return false
+    }
+    
+    // Try immediately
+    if (!performScroll()) {
+      // If element not found, try after delays (for dynamic content)
+      setTimeout(() => {
+        if (!performScroll()) {
+          setTimeout(() => {
+            if (!performScroll()) {
+              // Final attempt
+              setTimeout(performScroll, 300)
+            }
+          }, 200)
+        }
+      }, 100)
+    }
   }
 
   return (
@@ -150,7 +221,7 @@ export default function Navigation() {
                 {t(item.key)}
               </a>
             ))}
-            <div className="relative" ref={moreDropdownRef}>
+            <div className="relative">
               <button
                 onClick={(e) => {
                   e.preventDefault()
@@ -165,26 +236,78 @@ export default function Navigation() {
               </button>
               {isMoreOpen && (
                 <div
+                  ref={moreDropdownRef}
                   className={`absolute top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-xl py-2 z-[9999] ${
                     dir === "rtl" ? "left-0" : "right-0"
                   }`}
-                  onClick={(e) => e.stopPropagation()}
                 >
-                  {secondaryNavItems.map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      onClick={(e) => {
-                        scrollToSection(e, item.href)
+                  {secondaryNavItems.map((item) => {
+                    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      
+                      const targetId = item.href.replace('#', '')
+                      
+                      // Update URL immediately
+                      if (window.history && window.history.pushState) {
+                        window.history.pushState(null, '', item.href)
+                      } else {
+                        window.location.hash = targetId
+                      }
+                      
+                      // Close dropdown after a tiny delay to ensure click registers
+                      setTimeout(() => {
                         setIsMoreOpen(false)
-                      }}
-                      className={`block px-4 py-2 text-xs xl:text-sm hover:bg-muted transition cursor-pointer ${
-                        dir === "rtl" ? "text-right" : "text-left"
-                      }`}
-                    >
-                      {t(item.key)}
-                    </a>
-                  ))}
+                      }, 10)
+                      
+                      // Scroll to element
+                      const scrollToElement = () => {
+                        let element = document.getElementById(targetId)
+                        if (!element) {
+                          element = document.querySelector(`[id="${targetId}"]`) as HTMLElement
+                        }
+                        
+                        if (element) {
+                          const headerOffset = 100
+                          const rect = element.getBoundingClientRect()
+                          const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
+                          const elementTop = rect.top + scrollTop
+                          const offsetPosition = elementTop - headerOffset
+                          
+                          window.scrollTo({
+                            top: Math.max(0, offsetPosition),
+                            behavior: 'smooth'
+                          })
+                          return true
+                        }
+                        return false
+                      }
+                      
+                      // Try immediately, then retry if needed
+                      requestAnimationFrame(() => {
+                        if (!scrollToElement()) {
+                          setTimeout(() => {
+                            if (!scrollToElement()) {
+                              setTimeout(scrollToElement, 200)
+                            }
+                          }, 100)
+                        }
+                      })
+                    }
+                    
+                    return (
+                      <button
+                        key={item.href}
+                        type="button"
+                        onClick={handleClick}
+                        className={`w-full text-left block px-4 py-2 text-xs xl:text-sm hover:bg-muted transition cursor-pointer ${
+                          dir === "rtl" ? "text-right" : "text-left"
+                        }`}
+                      >
+                        {t(item.key)}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -204,12 +327,13 @@ export default function Navigation() {
               <a
                 key={item.href}
                 href={item.href}
-                className="px-2 py-1.5 text-xs font-medium hover:text-primary hover:bg-muted/50 rounded-md transition-colors"
+                onClick={(e) => scrollToSection(e, item.href)}
+                className="px-2 py-1.5 text-xs font-medium hover:text-primary hover:bg-muted/50 rounded-md transition-colors cursor-pointer"
               >
                 {t(item.key)}
               </a>
             ))}
-            <div className="relative" ref={moreDropdownRef}>
+            <div className="relative">
               <button
                 onClick={(e) => {
                   e.preventDefault()
@@ -223,42 +347,146 @@ export default function Navigation() {
               </button>
               {isMoreOpen && (
                 <div
+                  ref={moreDropdownRef}
                   className={`absolute top-full mt-1 w-56 bg-card border border-border rounded-lg shadow-xl py-2 z-[9999] max-h-[80vh] overflow-y-auto ${
                     dir === "rtl" ? "left-0" : "right-0"
                   }`}
-                  onClick={(e) => e.stopPropagation()}
                 >
-                  {primaryNavItems.slice(3).map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      onClick={(e) => {
-                        scrollToSection(e, item.href)
+                  {primaryNavItems.slice(3).map((item) => {
+                    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      
+                      const targetId = item.href.replace('#', '')
+                      
+                      // Update URL immediately
+                      if (window.history && window.history.pushState) {
+                        window.history.pushState(null, '', item.href)
+                      } else {
+                        window.location.hash = targetId
+                      }
+                      
+                      // Close dropdown after a tiny delay to ensure click registers
+                      setTimeout(() => {
                         setIsMoreOpen(false)
-                      }}
-                      className={`block px-4 py-2 text-xs hover:bg-muted transition cursor-pointer ${
-                        dir === "rtl" ? "text-right" : "text-left"
-                      }`}
-                    >
-                      {t(item.key)}
-                    </a>
-                  ))}
+                      }, 10)
+                      
+                      // Scroll to element
+                      const scrollToElement = () => {
+                        let element = document.getElementById(targetId)
+                        if (!element) {
+                          element = document.querySelector(`[id="${targetId}"]`) as HTMLElement
+                        }
+                        
+                        if (element) {
+                          const headerOffset = 100
+                          const rect = element.getBoundingClientRect()
+                          const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
+                          const elementTop = rect.top + scrollTop
+                          const offsetPosition = elementTop - headerOffset
+                          
+                          window.scrollTo({
+                            top: Math.max(0, offsetPosition),
+                            behavior: 'smooth'
+                          })
+                          return true
+                        }
+                        return false
+                      }
+                      
+                      // Try immediately, then retry if needed
+                      requestAnimationFrame(() => {
+                        if (!scrollToElement()) {
+                          setTimeout(() => {
+                            if (!scrollToElement()) {
+                              setTimeout(scrollToElement, 200)
+                            }
+                          }, 100)
+                        }
+                      })
+                    }
+                    
+                    return (
+                      <button
+                        key={item.href}
+                        type="button"
+                        onClick={handleClick}
+                        className={`w-full text-left block px-4 py-2 text-xs hover:bg-muted transition cursor-pointer ${
+                          dir === "rtl" ? "text-right" : "text-left"
+                        }`}
+                      >
+                        {t(item.key)}
+                      </button>
+                    )
+                  })}
                   <div className="border-t border-border my-1" />
-                  {secondaryNavItems.map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      onClick={(e) => {
-                        scrollToSection(e, item.href)
+                  {secondaryNavItems.map((item) => {
+                    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      
+                      const targetId = item.href.replace('#', '')
+                      
+                      // Update URL immediately
+                      if (window.history && window.history.pushState) {
+                        window.history.pushState(null, '', item.href)
+                      } else {
+                        window.location.hash = targetId
+                      }
+                      
+                      // Close dropdown after a tiny delay to ensure click registers
+                      setTimeout(() => {
                         setIsMoreOpen(false)
-                      }}
-                      className={`block px-4 py-2 text-xs hover:bg-muted transition cursor-pointer ${
-                        dir === "rtl" ? "text-right" : "text-left"
-                      }`}
-                    >
-                      {t(item.key)}
-                    </a>
-                  ))}
+                      }, 10)
+                      
+                      // Scroll to element
+                      const scrollToElement = () => {
+                        let element = document.getElementById(targetId)
+                        if (!element) {
+                          element = document.querySelector(`[id="${targetId}"]`) as HTMLElement
+                        }
+                        
+                        if (element) {
+                          const headerOffset = 100
+                          const rect = element.getBoundingClientRect()
+                          const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
+                          const elementTop = rect.top + scrollTop
+                          const offsetPosition = elementTop - headerOffset
+                          
+                          window.scrollTo({
+                            top: Math.max(0, offsetPosition),
+                            behavior: 'smooth'
+                          })
+                          return true
+                        }
+                        return false
+                      }
+                      
+                      // Try immediately, then retry if needed
+                      requestAnimationFrame(() => {
+                        if (!scrollToElement()) {
+                          setTimeout(() => {
+                            if (!scrollToElement()) {
+                              setTimeout(scrollToElement, 200)
+                            }
+                          }, 100)
+                        }
+                      })
+                    }
+                    
+                    return (
+                      <button
+                        key={item.href}
+                        type="button"
+                        onClick={handleClick}
+                        className={`w-full text-left block px-4 py-2 text-xs hover:bg-muted transition cursor-pointer ${
+                          dir === "rtl" ? "text-right" : "text-left"
+                        }`}
+                      >
+                        {t(item.key)}
+                      </button>
+                    )
+                  })}
                   <div className="border-t border-border my-1" />
                   <a
                     href="https://german-assist.com/login/index.php"

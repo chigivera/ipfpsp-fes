@@ -36,6 +36,7 @@ export default function EnrollmentSection() {
   return (
     <section
       id="contact"
+      className="scroll-mt-24"
       className="py-20 bg-gradient-to-b from-background via-primary/5 to-background relative overflow-hidden"
     >
       {/* Background Pattern */}

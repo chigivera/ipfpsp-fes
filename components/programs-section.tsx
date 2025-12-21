@@ -153,7 +153,7 @@ export default function ProgramsSection() {
   ]
 
   return (
-    <section id="programs" className="py-20 bg-card/30">
+    <section id="programs" className="py-20 bg-card/30 scroll-mt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -162,7 +162,7 @@ export default function ProgramsSection() {
         </div>
 
         {/* Diplomas Section */}
-        <div id="diplomas" className="mb-16 scroll-mt-20">
+        <div id="diplomas" className="mb-16 scroll-mt-24">
           <h3 className="text-3xl font-bold mb-8 text-center">{t("diplomas.title")}</h3>
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {diplomas.map((diploma) => {
@@ -191,7 +191,7 @@ export default function ProgramsSection() {
         </div>
 
         {/* Formations Section */}
-        <div id="formations" className="mb-16 scroll-mt-20">
+        <div id="formations" className="mb-16 scroll-mt-24">
           <div className="text-center mb-8">
             <h3 className="text-3xl font-bold mb-4">{t("formations.subtitle")}</h3>
             <p className="text-muted-foreground">{t("formations.title")}</p>
@@ -222,7 +222,7 @@ export default function ProgramsSection() {
         </div>
 
         {/* Language Courses Section */}
-        <div id="languages" className="mb-16 scroll-mt-20">
+        <div id="languages" className="mb-16 scroll-mt-24">
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-8">
             <div>
               <h3 className="text-3xl font-bold mb-4">{t("languages.title")}</h3>
@@ -265,7 +265,7 @@ export default function ProgramsSection() {
         </div>
 
         {/* Online Learning */}
-        <div id="online" className="mb-16 scroll-mt-20">
+        <div id="online" className="mb-16 scroll-mt-24">
           <Card className="p-8 md:p-12 border-none shadow-xl bg-gradient-to-br from-primary/5 to-accent/5">
             <div className="text-center mb-6">
               <Laptop className="w-16 h-16 text-primary mx-auto mb-4" />
@@ -280,7 +280,7 @@ export default function ProgramsSection() {
         </div>
 
         {/* Companies Section */}
-        <div id="companies" className="mb-16 scroll-mt-20">
+        <div id="companies" className="mb-16 scroll-mt-24">
           <Card className="p-8 md:p-12 border-none shadow-xl bg-gradient-to-br from-secondary/5 to-primary/5">
             <div className="text-center mb-6">
               <Building2 className="w-16 h-16 text-secondary mx-auto mb-4" />

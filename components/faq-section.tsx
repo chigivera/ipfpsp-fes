@@ -39,7 +39,7 @@ export default function FAQSection() {
   ]
 
   return (
-    <section id="faq" className="py-20 bg-gradient-to-b from-background to-card/30">
+    <section id="faq" className="py-20 bg-gradient-to-b from-background to-card/30 scroll-mt-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">{t("faq.title")}</h2>
