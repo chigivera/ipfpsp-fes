@@ -43,6 +43,38 @@ export default function Navigation() {
     { href: "#faq", key: "nav.faq" },
   ]
 
+  // Handle hash links on page load
+  useEffect(() => {
+    const handleHashScroll = () => {
+      const hash = window.location.hash
+      if (hash) {
+        setTimeout(() => {
+          const targetId = hash.replace('#', '')
+          const element = document.getElementById(targetId)
+          if (element) {
+            const headerOffset = 100
+            const elementPosition = element.getBoundingClientRect().top
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            })
+          }
+        }, 100)
+      }
+    }
+
+    // Handle initial hash
+    handleHashScroll()
+
+    // Handle hash changes (e.g., browser back/forward)
+    window.addEventListener('hashchange', handleHashScroll)
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashScroll)
+    }
+  }, [])
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -71,6 +103,28 @@ export default function Navigation() {
     setIsOpen(false)
   }
 
+  // Smooth scroll to section with offset for sticky navbar
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault()
+    const targetId = href.replace('#', '')
+    const element = document.getElementById(targetId)
+    
+    if (element) {
+      const headerOffset = 100 // Account for sticky navbar + some padding
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+    }
+    
+    // Close menus
+    setIsOpen(false)
+    setIsMoreOpen(false)
+  }
+
   return (
     <nav className="sticky top-0 z-50 bg-card/95 backdrop-blur border-b border-border overflow-visible">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,7 +144,8 @@ export default function Navigation() {
               <a
                 key={item.href}
                 href={item.href}
-                className="px-2.5 py-2 text-xs xl:text-sm font-medium hover:text-primary hover:bg-muted/50 rounded-md transition-colors whitespace-nowrap"
+                onClick={(e) => scrollToSection(e, item.href)}
+                className="px-2.5 py-2 text-xs xl:text-sm font-medium hover:text-primary hover:bg-muted/50 rounded-md transition-colors whitespace-nowrap cursor-pointer"
               >
                 {t(item.key)}
               </a>
@@ -119,8 +174,11 @@ export default function Navigation() {
                     <a
                       key={item.href}
                       href={item.href}
-                      onClick={() => setIsMoreOpen(false)}
-                      className={`block px-4 py-2 text-xs xl:text-sm hover:bg-muted transition ${
+                      onClick={(e) => {
+                        scrollToSection(e, item.href)
+                        setIsMoreOpen(false)
+                      }}
+                      className={`block px-4 py-2 text-xs xl:text-sm hover:bg-muted transition cursor-pointer ${
                         dir === "rtl" ? "text-right" : "text-left"
                       }`}
                     >
@@ -174,8 +232,11 @@ export default function Navigation() {
                     <a
                       key={item.href}
                       href={item.href}
-                      onClick={() => setIsMoreOpen(false)}
-                      className={`block px-4 py-2 text-xs hover:bg-muted transition ${
+                      onClick={(e) => {
+                        scrollToSection(e, item.href)
+                        setIsMoreOpen(false)
+                      }}
+                      className={`block px-4 py-2 text-xs hover:bg-muted transition cursor-pointer ${
                         dir === "rtl" ? "text-right" : "text-left"
                       }`}
                     >
@@ -187,8 +248,11 @@ export default function Navigation() {
                     <a
                       key={item.href}
                       href={item.href}
-                      onClick={() => setIsMoreOpen(false)}
-                      className={`block px-4 py-2 text-xs hover:bg-muted transition ${
+                      onClick={(e) => {
+                        scrollToSection(e, item.href)
+                        setIsMoreOpen(false)
+                      }}
+                      className={`block px-4 py-2 text-xs hover:bg-muted transition cursor-pointer ${
                         dir === "rtl" ? "text-right" : "text-left"
                       }`}
                     >
@@ -285,8 +349,11 @@ export default function Navigation() {
                 <a
                   key={item.href}
                   href={item.href}
-                  onClick={handleNavClick}
-                  className="block px-3 py-2.5 text-sm font-medium hover:bg-muted rounded-lg transition-colors"
+                  onClick={(e) => {
+                    scrollToSection(e, item.href)
+                    handleNavClick()
+                  }}
+                  className="block px-3 py-2.5 text-sm font-medium hover:bg-muted rounded-lg transition-colors cursor-pointer"
                 >
                   {t(item.key)}
                 </a>
@@ -300,8 +367,11 @@ export default function Navigation() {
                 <a
                   key={item.href}
                   href={item.href}
-                  onClick={handleNavClick}
-                  className="block px-3 py-2.5 text-sm font-medium hover:bg-muted rounded-lg transition-colors"
+                  onClick={(e) => {
+                    scrollToSection(e, item.href)
+                    handleNavClick()
+                  }}
+                  className="block px-3 py-2.5 text-sm font-medium hover:bg-muted rounded-lg transition-colors cursor-pointer"
                 >
                   {t(item.key)}
                 </a>
